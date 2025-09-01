@@ -5,178 +5,244 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Memory Fix | Numbers</title>
 <style>
-body { font-family: Arial, sans-serif; background: #f0f0f0; margin:0; padding:0; }
-header { background:#2c3e50; color:#fff; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
-header h1 { margin:0; }
-nav a { color:#fff; margin-left:1rem; text-decoration:none; font-weight:bold; }
-nav a:hover { text-decoration:underline; }
-main { padding:2rem; max-width:900px; margin:auto; }
-button { padding:0.5rem 1rem; margin:5px; border:none; border-radius:8px; background:#3498db; color:#fff; cursor:pointer; }
-button:hover { background:#2980b9; }
-#generatedNumber { font-size:2rem; font-weight:bold; text-align:center; margin:1rem; padding:1rem; background:#fff; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-#numberList { margin-top:1rem; background:#fff; padding:1rem; border-radius:12px; min-height:100px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-label { display:block; margin:10px 0; }
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin:0;
+  padding:20px;
+  background: linear-gradient(135deg, #f0f9ff, #cbebff);
+  color:#333;
+  text-align:center;
+}
+
+h2 { color: #2c3e50; font-size:32px; margin-bottom:20px; }
+label { font-weight:bold; margin:5px; }
+select,input { margin:5px; padding:8px 12px; font-size:16px; border:2px solid #ccc; border-radius:8px; outline:none; transition:0.2s; }
+select:focus,input:focus { border-color:#3498db; box-shadow:0 0 6px rgba(52,152,219,0.4); }
+
+button {
+  margin:10px; padding:14px 28px; font-size:18px; font-weight:bold; border:none; border-radius:12px;
+  cursor:pointer; background: linear-gradient(90deg, #27ae60, #2ecc71); color:white;
+  transition: transform 0.2s, opacity 0.2s;
+}
+button:hover { transform:scale(1.05); opacity:0.9; }
+button:active { transform:scale(0.95); }
+
+#currentNumbers {
+  font-size:36px; margin:25px auto 15px auto; padding:20px; width:fit-content;
+  background:#27ae60; color:white; border-radius:15px; font-weight:bold; box-shadow:0px 4px 10px rgba(0,0,0,0.2);
+}
+
+ul { list-style:none; padding:0; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+li {
+  background:#f8f9fa; margin:5px; padding:12px 20px; min-width:70px; border-radius:8px;
+  font-size:22px; font-weight:bold; color:#2c3e50; box-shadow:0px 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Reproduction */
+#placeholders,#deck { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:20px; }
+.number-placeholder, .number-card {
+  width:60px; height:60px; display:flex; align-items:center; justify-content:center; border-radius:8px;
+  font-weight:bold; font-size:18px; background:#fff; border:1px solid #333; cursor:grab;
+}
+.number-placeholder { border:2px dashed #999; cursor:default; }
 </style>
 </head>
 <body>
 
-<header>
-<h1>Memory Fix</h1>
-<nav>
-  <a href="index.html">Home</a>
-  <a href="disciplines.html">Disciplines</a>
-  <a href="numbers.html">Numbers</a>
-  <a href="stats.html">Stats</a>
-  <a href="about.html">About</a>
-</nav>
-</header>
+<h2>🎲 Number Memorization</h2>
 
-<main>
-<h2>Random Number Memorization</h2>
-
-<label>Choose number type:
-<select id="numberType">
-  <option value="2digit">2-Digit</option>
-  <option value="3digit">3-Digit</option>
-  <option value="custom">Custom Prefix 3-Digit</option>
-</select>
-</label>
-
-<label id="prefixLabel" style="display:none;">Prefix (0-9):
-<input type="number" id="prefix" min="0" max="9" value="0"></label>
-
-<label>Number of numbers:
-<select id="deckSize">
-  <option value="10">10</option>
-  <option value="20">20</option>
-  <option value="50">50</option>
-</select>
-</label>
-
-<button onclick="startMemorization()">Start</button>
+<div id="setup">
+  <label>Total Numbers:</label><input type="number" id="totalNumbers" value="20" min="1">
+  <label>Numbers per Group:</label>
+  <select id="groupSize"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select>
+  <label>Memorization Timer (min):</label><input type="number" id="memTimerMin" value="1" min="1">
+  <br>
+  <label>Choose digits:</label>
+  <select id="digitSelect">
+    <option value="2">2-digit</option>
+    <option value="3">3-digit</option>
+    <option value="3prefix">3-digit with custom prefix</option>
+  </select>
+  <label id="prefixLabel" style="display:none;">Prefix:</label>
+  <input type="number" id="prefixInput" min="0" max="9" value="0" style="display:none;">
+  <br>
+  <button onclick="startMemorization()">Start ➡️</button>
+  <button onclick="resetList()">Reset 🔄</button>
+</div>
 
 <div id="memorization" style="display:none;">
-<p>Memorize this number:</p>
-<div id="generatedNumber"></div>
-<button onclick="nextNumber()">Next</button>
-<p>Time elapsed: <span id="memTime">0</span> s</p>
+  <h3>Memorization</h3>
+  <div id="currentNumbers">--</div>
+  <button onclick="nextGroup()">Next Group ⏭️</button>
+  <ul id="numberList"></ul>
 </div>
 
 <div id="recollection" style="display:none;">
-<p>Recollection phase (1 min). Try to recall the numbers. <button onclick="skipRecollection()">Skip</button></p>
+  <h3>Recollection (1 min)</h3>
+  <p>Try to recall the numbers. <button onclick="skipRecollection()">Skip</button></p>
 </div>
 
 <div id="reproduction" style="display:none;">
-<p>Reproduction phase: Drag the numbers into correct order.</p>
-<div id="placeholders" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;"></div>
-<div id="deck" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
-<button onclick="submitReproduction()">Submit</button>
+  <h3>Reproduction Phase</h3>
+  <div id="placeholders"></div>
+  <div id="deck"></div>
+  <button onclick="submitReproduction()">Submit</button>
 </div>
 
 <div id="results" style="display:none;">
-<p id="score"></p>
+  <h3>Results</h3>
+  <p id="score"></p>
 </div>
 
-<div id="numberList"></div>
-
 <script>
-let chosenNumbers=[],deckSize=10,memIndex=0,seconds=0,memTimer=[],userChoices=[];
+let allNumbers=[],lockedNumbers=[],currentIndex=0,groupSize=6,totalNumbers=20;
+let memorizeTimer=null,userChoices=[];
 
-// Show prefix only if custom
-document.getElementById('numberType').addEventListener('change', e=>{
-  document.getElementById('prefixLabel').style.display = e.target.value==='custom'?'inline-block':'none';
+// Show/hide prefix
+document.getElementById("digitSelect").addEventListener("change", function() {
+  const prefixLabel = document.getElementById("prefixLabel");
+  const prefixInput = document.getElementById("prefixInput");
+  if(this.value==="3prefix"){ prefixLabel.style.display="inline"; prefixInput.style.display="inline"; }
+  else { prefixLabel.style.display="none"; prefixInput.style.display="none"; }
 });
 
-function generateNumbers(type,n,prefix=0){
-  const nums=[];
-  for(let i=0;i<n;i++){
-    let num;
-    if(type==='2digit') num=Math.floor(Math.random()*90)+10;
-    else if(type==='3digit') num=Math.floor(Math.random()*1000).toString().padStart(3,'0');
-    else num=(prefix.toString() + Math.floor(Math.random()*100).toString().padStart(2,'0'));
-    nums.push(num);
+// Generate number
+function generateNumber() {
+  const digitChoice=document.getElementById("digitSelect").value;
+  if(digitChoice==="2") return String(Math.floor(Math.random()*100)).padStart(2,'0');
+  if(digitChoice==="3") return String(Math.floor(Math.random()*1000)).padStart(3,'0');
+  if(digitChoice==="3prefix") {
+    const prefix=document.getElementById("prefixInput").value;
+    const suffix=String(Math.floor(Math.random()*100)).padStart(2,'0');
+    return prefix+suffix;
   }
-  return nums;
 }
 
+// Start memorization
 function startMemorization(){
-  deckSize=parseInt(document.getElementById('deckSize').value);
-  const type=document.getElementById('numberType').value;
-  const prefix=parseInt(document.getElementById('prefix').value)||0;
-  chosenNumbers=generateNumbers(type,deckSize,prefix);
-  memIndex=0; seconds=0; userChoices=[];
-  document.getElementById('memorization').style.display='block';
-  document.getElementById('recollection').style.display='none';
-  document.getElementById('reproduction').style.display='none';
-  document.getElementById('results').style.display='none';
-  document.getElementById('numberList').innerHTML='';
-  document.getElementById('memTime').innerText='0';
-  displayMemorizeNumber();
-  memTimer=setInterval(()=>{seconds++; document.getElementById('memTime').innerText=seconds;},1000);
-}
+  totalNumbers=parseInt(document.getElementById("totalNumbers").value);
+  groupSize=parseInt(document.getElementById("groupSize").value);
+  const memMinutes=parseInt(document.getElementById("memTimerMin").value);
 
-function displayMemorizeNumber(){
-  document.getElementById('generatedNumber').innerText=chosenNumbers[memIndex];
-}
+  // Generate numbers
+  allNumbers=[];
+  lockedNumbers=[];
+  for(let i=0;i<totalNumbers;i++) allNumbers.push(generateNumber());
+  currentIndex=0;
+  userChoices=[];
+  updateList();
 
-function nextNumber(){
-  memIndex++;
-  if(memIndex>=chosenNumbers.length){
-    clearInterval(memTimer);
-    document.getElementById('memorization').style.display='none';
+  // Show memorization section
+  document.getElementById("setup").style.display="none";
+  document.getElementById("memorization").style.display="block";
+  displayGroup(groupSize);
+
+  // Memorization timer
+  clearTimeout(memorizeTimer);
+  memorizeTimer=setTimeout(()=>{
+    alert("Memorization time over!");
     startRecollection();
-  } else displayMemorizeNumber();
+  }, memMinutes*60*1000);
 }
 
+// Display group
+function displayGroup(size){
+  if(currentIndex>=allNumbers.length){ alert("All numbers shown!"); return; }
+  const group=[];
+  for(let i=0;i<size;i++){
+    if(currentIndex+i<allNumbers.length) group.push(allNumbers[currentIndex+i]);
+  }
+  document.getElementById("currentNumbers").textContent=group.join(" ");
+  lockedNumbers.push(...group);
+  currentIndex+=size;
+  updateList();
+}
+
+// Next Group
+function nextGroup(){ displayGroup(groupSize); }
+
+// Update locked list
+function updateList(){
+  const list=document.getElementById("numberList");
+  list.innerHTML="";
+  lockedNumbers.forEach(n=>{
+    const li=document.createElement("li"); li.textContent=n; list.appendChild(li);
+  });
+}
+
+// Reset
+function resetList(){
+  clearTimeout(memorizeTimer);
+  allNumbers=[]; lockedNumbers=[]; currentIndex=0; userChoices=[];
+  document.getElementById("currentNumbers").textContent="--";
+  document.getElementById("numberList").innerHTML="";
+  document.getElementById("memorization").style.display="none";
+  document.getElementById("recollection").style.display="none";
+  document.getElementById("reproduction").style.display="none";
+  document.getElementById("results").style.display="none";
+  document.getElementById("setup").style.display="block";
+}
+
+// Recollection
 function startRecollection(){
-  document.getElementById('recollection').style.display='block';
-  setTimeout(()=>{ document.getElementById('recollection').style.display='none'; startReproduction(); },60000);
+  document.getElementById("memorization").style.display="none";
+  document.getElementById("recollection").style.display="block";
+  setTimeout(()=>{ skipRecollection(); }, 60000); // 1 min
 }
-function skipRecollection(){ document.getElementById('recollection').style.display='none'; startReproduction(); }
 
+function skipRecollection(){
+  document.getElementById("recollection").style.display="none";
+  startReproduction();
+}
+
+// Reproduction
 function startReproduction(){
-  document.getElementById('reproduction').style.display='block';
+  document.getElementById("reproduction").style.display="block";
   renderReproduction();
 }
-function renderReproduction(){
-  const placeholdersDiv=document.getElementById('placeholders');
-  const deckDiv=document.getElementById('deck');
-  placeholdersDiv.innerHTML=''; deckDiv.innerHTML=''; userChoices=Array(chosenNumbers.length).fill(null);
 
-  chosenNumbers.forEach((_,i)=>{
-    const ph=document.createElement('div'); ph.className='number-placeholder';
-    ph.dataset.index=i;
+function renderReproduction(){
+  const placeholdersDiv=document.getElementById("placeholders");
+  const deckDiv=document.getElementById("deck");
+  placeholdersDiv.innerHTML=''; deckDiv.innerHTML=''; userChoices=Array(allNumbers.length).fill(null);
+
+  allNumbers.forEach((_,i)=>{
+    const ph=document.createElement('div'); ph.className='number-placeholder'; ph.dataset.index=i;
     ph.ondragover=e=>e.preventDefault();
     ph.ondrop=e=>{
-      const idx=e.dataTransfer.getData('text'); 
-      const div=document.getElementById('num-'+idx);
-      ph.innerHTML=''; ph.appendChild(div); userChoices[i]=parseInt(idx);
+      const cardIndex=e.dataTransfer.getData('text');
+      const cardDiv=document.getElementById('num-'+cardIndex);
+      ph.innerHTML=''; ph.appendChild(cardDiv);
+      userChoices[i]=parseInt(cardIndex);
     };
     placeholdersDiv.appendChild(ph);
   });
 
-  chosenNumbers.forEach((num,i)=>{
-    const div=document.createElement('div');
-    div.id='num-'+i; div.className='number-card';
-    div.innerText=num; div.draggable=true;
-    div.ondragstart=e=>e.dataTransfer.setData('text',i);
-    deckDiv.appendChild(div);
+  allNumbers.forEach((num,i)=>{
+    const numDiv=document.createElement('div'); numDiv.id='num-'+i;
+    numDiv.className='number-card'; numDiv.draggable=true; numDiv.textContent=num;
+    numDiv.ondragstart=e=>{ e.dataTransfer.setData('text',i); };
+    deckDiv.appendChild(numDiv);
   });
 }
 
+// Submit reproduction
 function submitReproduction(){
   let correct=0;
-  userChoices.forEach((u,i)=>{ if(u!==null && chosenNumbers[u]===chosenNumbers[i]) correct++; });
-  let score10=((correct/chosenNumbers.length)*10).toFixed(2);
-  document.getElementById('score').innerText=`Correct: ${correct}/${chosenNumbers.length} → Score: ${score10}/10`;
-  document.getElementById('reproduction').style.display='none';
-  document.getElementById('results').style.display='block';
-  saveNumbersStats(score10,seconds,document.getElementById('numberType').value);
+  userChoices.forEach((userIdx,i)=>{
+    if(userIdx!==null && allNumbers[userIdx]===allNumbers[i]) correct++;
+  });
+  let score10=((correct/allNumbers.length)*10).toFixed(2);
+  document.getElementById("score").textContent=`Correct: ${correct}/${allNumbers.length} → Score: ${score10}/10`;
+  document.getElementById("reproduction").style.display="none";
+  document.getElementById("results").style.display="block";
+  saveNumbersStats(score10);
 }
 
-function saveNumbersStats(score,time,mode){
+// Save stats
+function saveNumbersStats(score){
   let stats=JSON.parse(localStorage.getItem('numbersStats'))||[];
-  stats.push({date:new Date().toISOString().split('T')[0], mode:mode, score:parseFloat(score), time:time});
+  stats.push({date:new Date().toISOString().split('T')[0],total:allNumbers.length,score:parseFloat(score)});
   localStorage.setItem('numbersStats',JSON.stringify(stats));
 }
 </script>
