@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats - Memory Fix</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      color: #2c3e50;
+    }
+
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 1px;
+    }
+
+    nav {
+      margin-top: 10px;
+    }
+
+    nav a {
+      color: #ecf0f1;
+      margin: 0 20px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #1abc9c;
+    }
+
+    main {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 26px;
+      color: #34495e;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    section {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    section:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    }
+
+    section h3 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #2c3e50;
+      border-bottom: 2px solid #1abc9c;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      background: #ecf0f1;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: background 0.3s ease;
+    }
+
+    li:hover {
+      background: #d0ece7;
+    }
+
+    .empty {
+      color: #7f8c8d;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Memory Fix Stats</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="disciplines.html">Disciplines</a>
+      <a href="stats.html">Stats</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Your Practice History</h2>
+
+    <div class="stats-container">
+      <section id="numbersStats">
+        <h3>Numbers</h3>
+        <ul id="numbersList"></ul>
+      </section>
+
+      <section id="cardsStats">
+        <h3>Cards</h3>
+        <ul id="cardsList"></ul>
+      </section>
+
+      <!-- Future categories like Names, Words, etc. go here -->
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadStats("numbers", "numbersList");
+      loadStats("cards", "cardsList");
+    });
+
+    function loadStats(key, elementId) {
+      const listEl = document.getElementById(elementId);
+      listEl.innerHTML = "";
+
+      const stats = JSON.parse(localStorage.getItem(key + "Stats")) || [];
+
+      if (stats.length === 0) {
+        listEl.innerHTML = "<li class='empty'>No history yet.</li>";
+        return;
+      }
+
+      stats.forEach((entry, index) => {
+        const li = document.createElement("li");
+
+        // If entry is stored as {date, score}, show properly
+        if (typeof entry === "object" && entry.date && entry.score !== undefined) {
+          li.textContent = `${index + 1}. ${entry.date} – Score: ${entry.score}`;
+        } else {
+          // Backward compatibility if old format was just text
+          li.textContent = `${index + 1}. ${entry}`;
+        }
+
+        listEl.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
