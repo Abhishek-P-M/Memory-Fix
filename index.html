@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Next Button Random Number Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #f7f7f7;
+    }
+    h1 { color: #333; }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      display: inline-block;
+      min-width: 300px;
+    }
+    .number {
+      font-size: 2em;
+      margin: 20px 0;
+      font-weight: bold;
+      color: #007BFF;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #007BFF;
+      color: white;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #e9f5ff;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Next Button Random Number Generator</h1>
+    
+    <label>Choose Digits:</label>
+    <select id="digitSelect">
+      <option value="2">2 Digits</option>
+      <option value="3">3 Digits</option>
+      <option value="4">4 Digits</option>
+    </select>
+    <br><br>
+    
+    <label>Lock Time (seconds):</label>
+    <input type="number" id="timeInput" value="2" min="1">
+    <br><br>
+    
+    <button onclick="nextNumber()">Next</button>
+    <div class="number" id="display">---</div>
+    
+    <h3>Locked Numbers</h3>
+    <ul id="lockedList"></ul>
+  </div>
+  
+  <script>
+    let currentNumber = null;
+    let lockedNumbers = new Set();
+    let lastGeneratedTime = null;
+
+    function nextNumber() {
+      const now = Date.now();
+      const lockTime = parseInt(document.getElementById("timeInput").value) * 1000;
+
+      // Check if previous number should be locked
+      if (currentNumber !== null && lastGeneratedTime !== null) {
+        if (now - lastGeneratedTime <= lockTime) {
+          lockedNumbers.add(currentNumber);
+          updateLockedList();
+        }
+      }
+
+      // Generate a new number
+      const digits = parseInt(document.getElementById("digitSelect").value);
+      const min = Math.pow(10, digits - 1);
+      const max = Math.pow(10, digits) - 1;
+
+      // Keep generating until not locked (if possible)
+      do {
+        currentNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      } while (lockedNumbers.has(currentNumber) && lockedNumbers.size < (max - min + 1));
+
+      document.getElementById("display").innerText = currentNumber;
+      lastGeneratedTime = now;
+    }
+
+    function updateLockedList() {
+      const list = document.getElementById("lockedList");
+      list.innerHTML = "";
+      lockedNumbers.forEach(num => {
+        const li = document.createElement("li");
+        li.textContent = num;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
