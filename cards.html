@@ -1,245 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cards Memory Training</title>
+  <meta charset="UTF-8">
+  <title>Memory Fix - Cards</title>
   <style>
     body {
+      font-family: Arial, sans-serif;
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #2c3e50, #34495e);
-      color: #ecf0f1;
+      padding: 0;
+      background: #f8fafc;
+      color: #333;
       text-align: center;
+    }
+    header {
+      background: #0a2647;
+      color: white;
       padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
     }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 15px;
-      color: #f1c40f;
+    nav {
+      background: #144272;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 10px;
     }
-    .card-area {
-      font-size: 2.5rem;
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .container {
       margin: 20px auto;
-      min-height: 80px;
+      max-width: 900px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    select, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    button {
+      background: #205295;
+      color: white;
+    }
+    button:hover {
+      background: #2c74b3;
+    }
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .card {
+      width: 80px;
+      height: 120px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 20px;
+      background: #fefefe;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .btn {
-      background: #1abc9c;
-      border: none;
-      color: white;
-      font-size: 1rem;
-      padding: 12px 20px;
-      margin: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #16a085;
-    }
-    select {
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-      font-size: 1rem;
-      margin: 10px;
-    }
-    #timer {
-      font-size: 1.2rem;
-      margin: 10px;
-      color: #e67e22;
-    }
-    .card-choice {
-      display: inline-block;
-      margin: 6px;
-      padding: 10px 14px;
-      background: #ecf0f1;
-      color: #2c3e50;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s, transform 0.2s;
-    }
-    .card-choice:hover {
-      background: #d0ece7;
-      transform: scale(1.05);
-    }
-    .card-choice.used {
-      background: #7f8c8d;
-      pointer-events: none;
-    }
-    #result {
-      font-size: 1.5rem;
-      margin-top: 20px;
+    .hidden { display: none; }
+    .timer {
+      font-size: 20px;
       font-weight: bold;
-      color: #2ecc71;
+      margin: 10px 0;
     }
-    .hidden {
-      display: none;
+    .score {
+      font-size: 22px;
+      font-weight: bold;
+      color: #205295;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>🃏 Cards Memory Training</h1>
+  <header>Memory Fix</header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="disciplines.html">Disciplines</a>
+    <a href="stats.html">Stats</a>
+    <a href="about.html">About</a>
+  </nav>
 
-  <div id="setup">
-    <label>Deck size:</label>
-    <select id="deckSize">
-      <option value="52">Full (52)</option>
-      <option value="26">Half (26)</option>
-      <option value="13">Quarter (13)</option>
-    </select>
-    <label>Group size:</label>
-    <select id="groupSize">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-    </select>
-    <br>
-    <button class="btn" onclick="startMemorization()">Start Training</button>
+  <div class="container">
+    <h2>Cards Training</h2>
+    <div id="setup">
+      <label for="deckSize">Deck size:</label>
+      <select id="deckSize">
+        <option value="10">10 cards</option>
+        <option value="20">20 cards</option>
+        <option value="30">30 cards</option>
+        <option value="40">40 cards</option>
+        <option value="52">52 cards</option>
+      </select>
+
+      <label for="groupSize">Group size:</label>
+      <select id="groupSize">
+        <option value="1">1 card</option>
+        <option value="2">2 cards</option>
+        <option value="3">3 cards</option>
+        <option value="4">4 cards</option>
+        <option value="5">5 cards</option>
+        <option value="6">6 cards</option>
+      </select>
+      <br><br>
+      <button onclick="startMemorization()">Start</button>
+      <button onclick="resetPreferences()">Reset Preferences</button>
+    </div>
+
+    <div id="memorization" class="hidden">
+      <h3>Memorization</h3>
+      <div class="timer" id="memorizationTimer">Time: 0s</div>
+      <div class="cards" id="cardsDisplay"></div>
+      <button onclick="nextGroup()">Next</button>
+    </div>
+
+    <div id="recollection" class="hidden">
+      <h3>Recollection (Wait or Skip)</h3>
+      <div class="timer" id="recollectionTimer">60s</div>
+      <button onclick="skipRecollection()">Skip</button>
+    </div>
+
+    <div id="reproduction" class="hidden">
+      <h3>Reproduction</h3>
+      <div class="cards" id="reproductionDeck"></div>
+      <div id="userSequence" class="cards"></div>
+      <button onclick="submitReproduction()">Submit</button>
+    </div>
+
+    <div id="results" class="hidden">
+      <h3>Results</h3>
+      <div class="score" id="scoreDisplay"></div>
+    </div>
   </div>
-
-  <div id="timer"></div>
-  <div class="card-area" id="cardsDisplay"></div>
-  <button id="nextBtn" class="btn hidden" onclick="showNext()">Next</button>
-
-  <div id="recollection" class="hidden">
-    <h2>Recollection Phase</h2>
-    <p>You have 1 minute to mentally recall the sequence. You may skip early.</p>
-    <button class="btn" onclick="skipRecollection()">Skip</button>
-  </div>
-
-  <div id="reproduction" class="hidden">
-    <h2>Reproduction Phase</h2>
-    <p>Select the cards in the order you remember:</p>
-    <div id="deckChoices"></div>
-    <button class="btn" onclick="finishReproduction()">Submit</button>
-  </div>
-
-  <h2 id="result"></h2>
 
   <script>
-    const suits = ["♠", "♥", "♦", "♣"];
-    const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
     let fullDeck = [];
-    let sequence = [];
+    let currentIndex = 0;
     let groupSize = 1;
-    let index = 0;
-    let startTime = 0;
-    let reproductionOrder = [];
-    let deckSize = 52;
+    let memorizationTime = 0;
+    let memorizationInterval;
+    let recollectionInterval;
+    let chosenDeck = [];
 
-    function generateDeck() {
-      let d = [];
-      for (let s of suits) {
-        for (let v of values) {
-          d.push(v + s);
-        }
-      }
-      return d;
+    // Load preferences
+    window.onload = function() {
+      const savedDeckSize = localStorage.getItem("deckSize");
+      const savedGroupSize = localStorage.getItem("groupSize");
+      if (savedDeckSize) document.getElementById("deckSize").value = savedDeckSize;
+      if (savedGroupSize) document.getElementById("groupSize").value = savedGroupSize;
+    };
+
+    function resetPreferences() {
+      localStorage.removeItem("deckSize");
+      localStorage.removeItem("groupSize");
+      document.getElementById("deckSize").value = "52";
+      document.getElementById("groupSize").value = "1";
+      alert("Preferences reset to default.");
     }
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i+1));
-        [array[i], array[j]] = [array[j], array[i]];
+    function generateDeck(deckSize) {
+      const suits = ["♠", "♥", "♦", "♣"];
+      const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+      let deck = [];
+      for (let suit of suits) {
+        for (let value of values) {
+          deck.push(value + suit);
+        }
       }
-      return array;
+      // Shuffle
+      deck = deck.sort(() => Math.random() - 0.5);
+      return deck.slice(0, deckSize);
     }
 
     function startMemorization() {
-      deckSize = parseInt(document.getElementById("deckSize").value);
+      const deckSize = parseInt(document.getElementById("deckSize").value);
       groupSize = parseInt(document.getElementById("groupSize").value);
-      fullDeck = shuffle(generateDeck()).slice(0, deckSize);
-      sequence = [...fullDeck];
-      index = 0;
-      reproductionOrder = [];
+
+      localStorage.setItem("deckSize", deckSize);
+      localStorage.setItem("groupSize", groupSize);
+
+      fullDeck = generateDeck(deckSize);
+      currentIndex = 0;
+      chosenDeck = [];
+
       document.getElementById("setup").classList.add("hidden");
-      document.getElementById("cardsDisplay").textContent = "";
-      document.getElementById("result").textContent = "";
-      document.getElementById("recollection").classList.add("hidden");
-      document.getElementById("reproduction").classList.add("hidden");
-      document.getElementById("nextBtn").classList.remove("hidden");
-      startTime = Date.now();
-      showNext();
+      document.getElementById("memorization").classList.remove("hidden");
+
+      memorizationTime = 0;
+      document.getElementById("memorizationTimer").innerText = "Time: 0s";
+      memorizationInterval = setInterval(() => {
+        memorizationTime++;
+        document.getElementById("memorizationTimer").innerText = "Time: " + memorizationTime + "s";
+      }, 1000);
+
+      showGroup();
     }
 
-    function showNext() {
-      if (index >= fullDeck.length) {
-        let timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
-        document.getElementById("cardsDisplay").textContent = "Done! Time: " + timeTaken + "s";
-        document.getElementById("nextBtn").classList.add("hidden");
-        setTimeout(startRecollection, 2000);
-        return;
+    function showGroup() {
+      const group = fullDeck.slice(currentIndex, currentIndex + groupSize);
+      const display = document.getElementById("cardsDisplay");
+      display.innerHTML = "";
+      group.forEach(card => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerText = card;
+        display.appendChild(div);
+      });
+    }
+
+    function nextGroup() {
+      currentIndex += groupSize;
+      if (currentIndex >= fullDeck.length) {
+        clearInterval(memorizationInterval);
+        document.getElementById("memorization").classList.add("hidden");
+        startRecollection();
+      } else {
+        showGroup();
       }
-      let group = fullDeck.slice(index, index + groupSize);
-      document.getElementById("cardsDisplay").textContent = group.join(" ");
-      index += groupSize;
     }
 
     function startRecollection() {
       document.getElementById("recollection").classList.remove("hidden");
-      document.getElementById("cardsDisplay").textContent = "";
-      let countdown = 60;
-      const timerEl = document.getElementById("timer");
-      timerEl.textContent = "Recollection time: " + countdown + "s";
-      const interval = setInterval(() => {
-        countdown--;
-        timerEl.textContent = "Recollection time: " + countdown + "s";
-        if (countdown <= 0) {
-          clearInterval(interval);
-          skipRecollection();
+      let timeLeft = 60;
+      document.getElementById("recollectionTimer").innerText = timeLeft + "s";
+      recollectionInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("recollectionTimer").innerText = timeLeft + "s";
+        if (timeLeft <= 0) {
+          clearInterval(recollectionInterval);
+          document.getElementById("recollection").classList.add("hidden");
+          startReproduction();
         }
       }, 1000);
     }
 
     function skipRecollection() {
+      clearInterval(recollectionInterval);
       document.getElementById("recollection").classList.add("hidden");
       startReproduction();
     }
 
     function startReproduction() {
       document.getElementById("reproduction").classList.remove("hidden");
-      let deckChoices = document.getElementById("deckChoices");
-      deckChoices.innerHTML = "";
-      let d = generateDeck();
-      d.forEach(card => {
-        let btn = document.createElement("div");
-        btn.className = "card-choice";
-        btn.textContent = card;
-        btn.onclick = () => {
-          reproductionOrder.push(card);
-          btn.classList.add("used");
-        };
-        deckChoices.appendChild(btn);
+      const deck = generateDeck(52); // full deck for selection
+      const container = document.getElementById("reproductionDeck");
+      container.innerHTML = "";
+      deck.forEach(card => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerText = card;
+        div.onclick = () => chooseCard(card);
+        container.appendChild(div);
       });
     }
 
-    function finishReproduction() {
-      let score = 0;
-      for (let i = 0; i < sequence.length; i++) {
-        if (reproductionOrder[i] === sequence[i]) {
-          score++;
-        }
-      }
-      let finalScore = ((score / sequence.length) * 10).toFixed(2);
-      document.getElementById("result").textContent =
-        `Your Score: ${finalScore}/10 (${score}/${sequence.length} correct)`;
+    function chooseCard(card) {
+      if (chosenDeck.length >= fullDeck.length) return;
+      chosenDeck.push(card);
+      const container = document.getElementById("userSequence");
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerText = card;
+      container.appendChild(div);
+    }
 
-      // Save to localStorage
-      let stats = JSON.parse(localStorage.getItem("cardsStats")) || [];
-      let now = new Date().toLocaleString();
-      stats.push({ 
-        date: now, 
-        deck: sequence.length, 
-        group: groupSize, 
-        score: finalScore + "/10" 
+    function submitReproduction() {
+      document.getElementById("reproduction").classList.add("hidden");
+      document.getElementById("results").classList.remove("hidden");
+
+      let correct = 0;
+      for (let i = 0; i < fullDeck.length; i++) {
+        if (chosenDeck[i] === fullDeck[i]) correct++;
+      }
+
+      const score = (correct / fullDeck.length) * 10;
+      document.getElementById("scoreDisplay").innerText =
+        `You scored ${score.toFixed(2)}/10 (${correct}/${fullDeck.length} correct)`;
+
+      // Save to stats
+      let stats = JSON.parse(localStorage.getItem("cardsStats") || "[]");
+      stats.push({
+        date: new Date().toLocaleString(),
+        deckSize: fullDeck.length,
+        groupSize: groupSize,
+        time: memorizationTime,
+        score: score.toFixed(2)
       });
       localStorage.setItem("cardsStats", JSON.stringify(stats));
     }
