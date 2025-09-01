@@ -58,14 +58,14 @@
         return String(Math.floor(Math.random() * 100)).padStart(2, '0');
       } 
       else if (digitChoice === "3") {
-        // 3-digit (100–999)
-        return String(Math.floor(Math.random() * 900) + 100);
+        // 3-digit (000–999)
+        return String(Math.floor(Math.random() * 1000)).padStart(3, '0');
       }
       else if (digitChoice === "3prefix") {
         // 3-digit with custom prefix
         const prefix = document.getElementById("prefixInput").value;
         const suffix = String(Math.floor(Math.random() * 100)).padStart(2, '0');
-        return prefix + suffix; // example: 5 + 07 = 507
+        return prefix + suffix; // e.g. 5 + 07 = 507
       }
     }
 
