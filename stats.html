@@ -1,229 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Fix | Stats</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f6f9;
-      color: #333;
-    }
-
-    header {
-      background: #2c3e50;
-      color: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-
-    nav a {
-      color: #fff;
-      margin-left: 1.5rem;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    nav a:hover {
-      text-decoration: underline;
-    }
-
-    main {
-      padding: 2rem;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    h2 {
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      color: #2c3e50;
-      font-size: 1.4rem;
-    }
-
-    .stat-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-card h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-      color: #34495e;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th, td {
-      padding: 0.8rem;
-      text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    th {
-      background: #ecf0f1;
-      color: #2c3e50;
-    }
-
-    tr:hover {
-      background: #f9f9f9;
-    }
-
-    .score {
-      font-weight: bold;
-      color: #27ae60;
-    }
-
-    .low-score {
-      color: #e74c3c;
-    }
-
-    canvas {
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Fix | Stats</title>
+<style>
+body { font-family:"Segoe UI",sans-serif; margin:0; padding:0; background:linear-gradient(135deg,#f0f9ff,#cbebff); color:#333; }
+header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; font-size:1.5rem; }
+nav a { color:white; margin-left:1.5rem; text-decoration:none; font-weight:500; }
+nav a:hover { text-decoration:underline; }
+main { max-width:1000px; margin:auto; padding:2rem; }
+h2 { color:#2c3e50; font-size:32px; margin-bottom:1rem; text-align:center; }
+section { background:white; border-radius:12px; padding:20px; margin-bottom:2rem; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+section h3 { color:#27ae60; margin-bottom:12px; }
+ul { list-style:none; padding:0; }
+li { padding:8px 12px; border-bottom:1px solid #eee; font-weight:500; display:flex; justify-content:space-between; }
+li:last-child { border-bottom:none; }
+button.tab { background:#3498db; color:white; border:none; border-radius:8px; padding:10px 20px; margin:5px; cursor:pointer; transition:0.2s; }
+button.tab.active { background:#27ae60; }
+button.tab:hover { opacity:0.9; transform:scale(1.05); }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Memory Fix</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="disciplines.html">Disciplines</a>
-      <a href="stats.html">Stats</a>
-      <a href="about.html">About</a>
-    </nav>
-  </header>
 
-  <main>
-    <h2>Practice Statistics</h2>
+<header>
+  <h1>Memory Fix</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="disciplines.html">Disciplines</a>
+    <a href="stats.html">Stats</a>
+    <a href="#">About</a>
+  </nav>
+</header>
 
-    <div class="stat-card">
-      <h3>Numbers</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Mode</th>
-            <th>Score</th>
-            <th>Time (s)</th>
-          </tr>
-        </thead>
-        <tbody id="numbers-stats"></tbody>
-      </table>
-      <canvas id="numbersChart" height="100"></canvas>
-    </div>
+<main>
+  <h2>Your Training Stats</h2>
 
-    <div class="stat-card">
-      <h3>Cards</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Deck Size</th>
-            <th>Score</th>
-            <th>Time (s)</th>
-          </tr>
-        </thead>
-        <tbody id="cards-stats"></tbody>
-      </table>
-      <canvas id="cardsChart" height="100"></canvas>
-    </div>
+  <div style="text-align:center; margin-bottom:20px;">
+    <button class="tab active" onclick="showStats('numbers')">Numbers</button>
+    <button class="tab" onclick="showStats('repetition')">Repetition</button>
+    <button class="tab" onclick="showStats('cards')">Cards</button>
+  </div>
 
-    <div class="stat-card">
-      <h3>Words</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Word Count</th>
-            <th>Score</th>
-            <th>Time (s)</th>
-          </tr>
-        </thead>
-        <tbody id="words-stats"></tbody>
-      </table>
-      <canvas id="wordsChart" height="100"></canvas>
-    </div>
-  </main>
+  <section id="statsContainer">
+    <h3>Numbers Stats</h3>
+    <ul id="statsList"></ul>
+  </section>
+</main>
 
-  <script>
-    // Utility to get stats from localStorage or empty array
-    function getStats(key) {
-      const stats = localStorage.getItem(key);
-      return stats ? JSON.parse(stats) : [];
+<script>
+const statsSections = {
+  numbers: JSON.parse(localStorage.getItem("numbersStats")) || [],
+  repetition: JSON.parse(localStorage.getItem("numbersStats")) || [], // assuming repetition shares same stats storage
+  cards: JSON.parse(localStorage.getItem("cardsStats")) || []
+};
+
+function showStats(type){
+  document.querySelectorAll("button.tab").forEach(btn=>btn.classList.remove("active"));
+  document.querySelector(`button.tab[onclick="showStats('${type}')"]`).classList.add("active");
+
+  const section = document.getElementById("statsContainer");
+  const ul = document.getElementById("statsList");
+  ul.innerHTML = "";
+  if(statsSections[type].length === 0){
+    ul.innerHTML = "<li>No stats available.</li>";
+    section.querySelector("h3").innerText = type.charAt(0).toUpperCase() + type.slice(1) + " Stats";
+    return;
+  }
+
+  statsSections[type].forEach(s=>{
+    const li = document.createElement("li");
+    let text="";
+    if(type==="cards"){
+      text=`Date: ${s.date} → Deck: ${s.deck}, Score: ${s.score}/10, Time: ${s.time}s`;
+    } else {
+      text=`Date: ${s.date} → Total: ${s.total}, Score: ${s.score}/10, Time: ${s.time}s`;
     }
+    li.innerText = text;
+    ul.appendChild(li);
+  });
 
-    function renderStats() {
-      const numbers = getStats('numbersStats');
-      const cards = getStats('cardsStats');
-      const words = getStats('wordsStats');
+  section.querySelector("h3").innerText = type.charAt(0).toUpperCase() + type.slice(1) + " Stats";
+}
 
-      function fillTable(bodyId, data, valueKey) {
-        const tbody = document.getElementById(bodyId);
-        tbody.innerHTML = '';
-        data.forEach(s => {
-          tbody.innerHTML += `<tr>
-            <td>${s.date}</td>
-            <td>${s[valueKey]}</td>
-            <td class="score ${s.score < 6 ? 'low-score' : ''}">${s.score}</td>
-            <td>${s.time}</td>
-          </tr>`;
-        });
-      }
+// Initialize
+showStats('numbers');
+</script>
 
-      fillTable('numbers-stats', numbers, 'mode');
-      fillTable('cards-stats', cards, 'deck');
-      fillTable('words-stats', words, 'count');
-
-      function drawChart(canvasId, data, valueKey, labelName, maxScore=10) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: data.map(d => d.date),
-            datasets: [{
-              label: labelName + ' Score',
-              data: data.map(d => d.score),
-              fill: false,
-              borderColor: '#3498db',
-              backgroundColor: '#3498db',
-              tension: 0.1
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: { min: 0, max: maxScore },
-            }
-          }
-        });
-      }
-
-      drawChart('numbersChart', numbers, 'mode', 'Numbers', 100);
-      drawChart('cardsChart', cards, 'deck', 'Cards', 10);
-      drawChart('wordsChart', words, 'count', 'Words', 10);
-    }
-
-    renderStats();
-  </script>
 </body>
 </html>
