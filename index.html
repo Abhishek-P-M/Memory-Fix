@@ -1,119 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Next Button Random Number Generator</title>
+  <meta charset="UTF-8" />
+  <title>Random Number Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #f7f7f7;
-    }
-    h1 { color: #333; }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-      display: inline-block;
-      min-width: 300px;
-    }
-    .number {
-      font-size: 2em;
-      margin: 20px 0;
-      font-weight: bold;
-      color: #007BFF;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
-      margin: 5px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #007BFF;
-      color: white;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      background: #e9f5ff;
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 1.2em;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f7f7f7; }
+    h1 { color: #333; margin-bottom: 10px; }
+    .box { background: #fff; padding: 22px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); display: inline-block; min-width: 320px; }
+    .number { font-size: 2.4rem; margin: 18px 0; font-weight: 800; letter-spacing: 1px; color: #0a58ca; }
+    .row { margin: 8px 0; }
+    label { font-weight: 600; margin-right: 8px; }
+    select, input[type="number"] { padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; }
+    button { padding: 10px 16px; font-size: 1rem; margin: 6px; border: none; border-radius: 10px; cursor: pointer; background: #0d6efd; color: #fff; }
+    button:hover { background: #0a58ca; }
+    .secondary { background: #6c757d; }
+    .secondary:hover { background: #5a6268; }
+    ul { list-style: none; padding: 0; max-height: 180px; overflow: auto; text-align: left; }
+    li { background: #e9f5ff; margin: 5px 0; padding: 8px 10px; border-radius: 8px; font-size: 1.05rem; }
+    .muted { color: #666; font-size: 0.95rem; }
   </style>
 </head>
 <body>
   <div class="box">
     <h1>Next Button Random Number Generator</h1>
-    
-    <label>Choose Digits:</label>
-    <select id="digitSelect">
-      <option value="2">2 Digits</option>
-      <option value="3">3 Digits</option>
-      <option value="4">4 Digits</option>
-    </select>
-    <br><br>
-    
-    <label>Lock Time (seconds):</label>
-    <input type="number" id="timeInput" value="2" min="1">
-    <br><br>
-    
-    <button onclick="nextNumber()">Next</button>
+
+    <div class="row">
+      <label for="modeSelect">Choose Digits:</label>
+      <select id="modeSelect">
+        <option value="z2">00–99 (3-digit, leading 0)</option>
+        <option value="2">2 Digits (10–99)</option>
+        <option value="3">3 Digits (100–999)</option>
+        <option value="4">4 Digits (1000–9999)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="timeInput">Lock Time (seconds):</label>
+      <input type="number" id="timeInput" value="2" min="1" />
+      <span class="muted">Press “Next” again within this time to lock the previous number.</span>
+    </div>
+
+    <div class="row">
+      <button onclick="nextNumber()">Next</button>
+      <button class="secondary" onclick="resetAll()">Reset</button>
+    </div>
+
     <div class="number" id="display">---</div>
-    
+
     <h3>Locked Numbers</h3>
     <ul id="lockedList"></ul>
   </div>
-  
+
   <script>
-    let currentNumber = null;
-    let lockedNumbers = new Set();
-    let lastGeneratedTime = null;
+    // State
+    let lockedKeys = new Set();     // stores unique keys like "z2:7" or "3:245"
+    let currentVal = null;          // numeric value of the current draw
+    let currentMode = null;         // "z2" | "2" | "3" | "4"
+    let lastGeneratedTime = null;   // timestamp (ms) when the current number was generated
 
-    function nextNumber() {
-      const now = Date.now();
-      const lockTime = parseInt(document.getElementById("timeInput").value) * 1000;
+    // Mode helpers
+    function getModeConfig(mode) {
+      // Returns {min, max, format(val)->string, key(val)->string, label(val)->string}
+      if (mode === "z2") {
+        return {
+          min: 0, max: 99,
+          format: (v) => String(v).padStart(3, "0"),     // display as 000–099
+          key:   (v) => `z2:${v}`,
+          label: (v) => String(v).padStart(3, "0")
+        };
+      }
+      const d = parseInt(mode, 10); // 2/3/4
+      const min = Math.pow(10, d - 1);
+      const max = Math.pow(10, d) - 1;
+      return {
+        min, max,
+        format: (v) => String(v),
+        key:   (v) => `${d}:${v}`,
+        label: (v) => String(v)
+      };
+    }
 
-      // Check if previous number should be locked
-      if (currentNumber !== null && lastGeneratedTime !== null) {
-        if (now - lastGeneratedTime <= lockTime) {
-          lockedNumbers.add(currentNumber);
-          updateLockedList();
-        }
+    function drawNewValue(mode) {
+      const cfg = getModeConfig(mode);
+      const total = cfg.max - cfg.min + 1;
+
+      if (countLockedForMode(mode) >= total) {
+        // All values in this mode are locked
+        alert("All numbers in this range are locked. Reset to start again.");
+        return null;
       }
 
-      // Generate a new number
-      const digits = parseInt(document.getElementById("digitSelect").value);
-      const min = Math.pow(10, digits - 1);
-      const max = Math.pow(10, digits) - 1;
-
-      // Keep generating until not locked (if possible)
+      let val;
+      let safety = 0;
       do {
-        currentNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-      } while (lockedNumbers.has(currentNumber) && lockedNumbers.size < (max - min + 1));
+        val = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+        safety++;
+        if (safety > 5000) break; // extreme safety against infinite loops
+      } while (lockedKeys.has(cfg.key(val)));
 
-      document.getElementById("display").innerText = currentNumber;
-      lastGeneratedTime = now;
+      return val;
+    }
+
+    function countLockedForMode(mode) {
+      const prefix = mode === "z2" ? "z2:" : `${parseInt(mode,10)}:`;
+      let c = 0;
+      lockedKeys.forEach(k => { if (k.startsWith(prefix)) c++; });
+      return c;
     }
 
     function updateLockedList() {
       const list = document.getElementById("lockedList");
       list.innerHTML = "";
-      lockedNumbers.forEach(num => {
+      const mode = document.getElementById("modeSelect").value;
+      const cfg = getModeConfig(mode);
+
+      // show only locks for the current mode (cleaner UX)
+      const items = [];
+      lockedKeys.forEach(k => {
+        if ((mode === "z2" && k.startsWith("z2:")) ||
+            (mode !== "z2" && k.startsWith(`${parseInt(mode,10)}:`))) {
+          const val = parseInt(k.split(":")[1], 10);
+          items.push(cfg.label(val));
+        }
+      });
+
+      if (items.length === 0) {
         const li = document.createElement("li");
-        li.textContent = num;
+        li.textContent = "No locked numbers yet.";
+        li.className = "muted";
+        list.appendChild(li);
+        return;
+      }
+
+      // keep list sorted for readability
+      items.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+      items.forEach(txt => {
+        const li = document.createElement("li");
+        li.textContent = txt;
         list.appendChild(li);
       });
     }
+
+    function nextNumber() {
+      const now = Date.now();
+      const lockMs = parseInt(document.getElementById("timeInput").value, 10) * 1000;
+      const newMode = document.getElementById("modeSelect").value;
+
+      // If pressing Next within lock time since last generation, lock the previous number
+      if (currentVal !== null && lastGeneratedTime !== null) {
+        if (now - lastGeneratedTime <= lockMs) {
+          const prevCfg = getModeConfig(currentMode);
+          lockedKeys.add(prevCfg.key(currentVal));
+          updateLockedList();
+        }
+      }
+
+      // Generate next value in the currently selected mode
+      currentMode = newMode;
+      const cfg = getModeConfig(currentMode);
+      const val = drawNewValue(currentMode);
+
+      if (val === null) return; // nothing to show (all locked)
+      currentVal = val;
+      lastGeneratedTime = now;
+
+      document.getElementById("display").innerText = cfg.format(val);
+    }
+
+    function resetAll() {
+      lockedKeys.clear();
+      currentVal = null;
+      currentMode = document.getElementById("modeSelect").value;
+      lastGeneratedTime = null;
+      document.getElementById("display").innerText = "---";
+      updateLockedList();
+    }
+
+    // Init
+    window.addEventListener("load", () => {
+      currentMode = document.getElementById("modeSelect").value;
+      updateLockedList();
+      document.getElementById("modeSelect").addEventListener("change", updateLockedList);
+    });
   </script>
 </body>
 </html>
