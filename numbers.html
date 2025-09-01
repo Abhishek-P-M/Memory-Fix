@@ -5,197 +5,207 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Memory Fix | Numbers</title>
 <style>
-body { font-family:"Segoe UI",sans-serif; text-align:center; margin:0; padding:20px; background:linear-gradient(135deg,#f0f9ff,#cbebff); }
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    margin:0;
+    padding:20px;
+    background: linear-gradient(135deg, #f0f9ff, #cbebff);
+    color: #333;
+}
 h2 { color:#2c3e50; font-size:32px; margin-bottom:20px; }
-label, select, input { font-size:16px; margin:8px; padding:8px 12px; border-radius:8px; border:2px solid #ccc; }
-select:focus,input:focus { border-color:#3498db; box-shadow:0 0 6px rgba(52,152,219,0.4); outline:none; }
-button { margin:10px; padding:14px 28px; font-size:18px; font-weight:bold; border:none; border-radius:12px; cursor:pointer; background:#27ae60; color:white; transition:0.2s; }
-button:hover { transform:scale(1.05); opacity:0.9; }
-button:active { transform:scale(0.95); }
+label { font-weight:bold; margin:8px; }
+select,input { padding:8px 12px; font-size:16px; border-radius:8px; border:2px solid #ccc; outline:none; transition:0.2s; }
+select:focus,input:focus { border-color:#3498db; box-shadow:0 0 6px rgba(52,152,219,0.4); }
+button { padding:12px 24px; margin:10px; font-size:18px; font-weight:bold; border:none; border-radius:12px; cursor:pointer; }
+button:hover { opacity:0.9; }
+button.start { background:#27ae60; color:white; }
+button.reset { background:#e74c3c; color:white; }
+
 #currentNumber { font-size:48px; margin:25px auto 15px auto; width:180px; padding:20px; background:#27ae60; color:white; border-radius:15px; font-weight:bold; box-shadow:0px 4px 10px rgba(0,0,0,0.2); }
-#countdownContainer { width:180px; height:12px; background:#eee; margin:10px auto 25px auto; border-radius:6px; overflow:hidden; box-shadow:inset 0 2px 5px rgba(0,0,0,0.1); }
-#countdownBar { height:100%; width:0%; background: linear-gradient(90deg, #2ecc71,#27ae60); transition:width 0.1s linear; }
-ul { list-style:none; padding:0; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
-li { background:#f8f9fa; margin:5px; padding:12px 20px; min-width:70px; border-radius:8px; font-size:22px; font-weight:bold; color:#2c3e50; box-shadow:0px 2px 6px rgba(0,0,0,0.15); }
-#reproductionContainer { margin-top:20px; }
-.placeholder { display:inline-block; width:50px; height:50px; border:2px solid #3498db; border-radius:8px; margin:4px; font-size:24px; line-height:50px; background:white; cursor:text; }
-.digitButton { display:inline-block; width:50px; height:50px; margin:4px; font-size:24px; background:#3498db; color:white; border:none; border-radius:8px; cursor:pointer; }
-.digitButton:hover { background:#2980b9; }
-#scoreDisplay { font-size:22px; font-weight:bold; margin-top:20px; }
-#statsContainer { margin-top:30px; text-align:left; max-width:600px; margin-left:auto; margin-right:auto; }
-#statsContainer h3 { text-align:center; }
-#statsList { list-style:none; padding:0; }
-#statsList li { background:#fff; margin:5px 0; padding:10px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+#countdownContainer { width:180px; height:12px; background:#eee; margin:10px auto 25px auto; border-radius:6px; overflow:hidden; box-shadow:inset 0px 2px 5px rgba(0,0,0,0.1); }
+#countdownBar { height:100%; width:0%; background: linear-gradient(90deg, #2ecc71, #27ae60); transition: width 0.1s linear; }
+
+#placeholders { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:20px; }
+.placeholder { width:50px; height:50px; border:2px solid #3498db; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; cursor:pointer; background:#fff; }
+.digit { width:50px; height:50px; border-radius:6px; background:#3498db; color:white; display:inline-flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; margin:5px; cursor:pointer; }
+
+#results { margin-top:30px; font-size:20px; }
 </style>
 </head>
 <body>
 
-<h2>🎲 Numbers Memorization</h2>
+<h2>Numbers Memorization</h2>
 
-<label>Choose digits:</label>
-<select id="digitSelect">
-  <option value="2">2-digit</option>
-  <option value="3">3-digit</option>
-  <option value="3prefix">3-digit with prefix</option>
-</select>
-<label id="prefixLabel" style="display:none;">Prefix:</label>
-<input type="number" id="prefixInput" min="0" max="9" value="0" style="display:none;">
-
-<br>
-<label>Choose Memorization Mode:</label>
-<select id="modeSelect">
-  <option value="count">Number of Numbers</option>
-  <option value="timer">Timer (minutes)</option>
+<label>Choose memorization method:</label>
+<select id="methodSelect">
+    <option value="count">Number of numbers</option>
+    <option value="timer">Custom timer</option>
 </select>
 
-<div id="countMode">
-  <label>Total Numbers:</label>
-  <input type="number" id="totalNumbers" value="10" min="1">
+<div id="countOption">
+    <label>Amount of numbers:</label>
+    <input type="number" id="numCount" value="10" min="1" max="100">
 </div>
 
-<div id="timerMode" style="display:none;">
-  <label>Memorization Time (minutes):</label>
-  <input type="number" id="memMinutes" value="1" min="1">
+<div id="timerOption" style="display:none;">
+    <label>Time for memorization (minutes):</label>
+    <input type="number" id="memMinutes" value="1" min="1" max="60">
 </div>
 
 <br>
-<button onclick="startMemorization()">Start</button>
-<button onclick="resetAll()">Reset 🔄</button>
+<button class="start" onclick="startMemorization()">Start</button>
+<button class="reset" onclick="resetAll()">Reset</button>
 
-<h3>Current Number:</h3>
-<div id="currentNumber">--</div>
-<div id="countdownContainer"><div id="countdownBar"></div></div>
-<p id="numbersLeft" style="font-size:18px;"></p>
-
-<h3>Locked Numbers:</h3>
-<ul id="numberList"></ul>
-
-<div id="reproductionContainer" style="display:none;">
-  <h3>Reproduction Phase</h3>
-  <div id="placeholders"></div>
-  <div id="digitButtons"></div>
-  <button onclick="submitReproduction()">Submit</button>
-  <div id="scoreDisplay"></div>
+<div id="memorization" style="display:none;">
+    <h3>Memorization</h3>
+    <div id="currentNumber">--</div>
+    <div id="countdownContainer"><div id="countdownBar"></div></div>
+    <p id="numbersLeft"></p>
+    <button onclick="nextNumber()">Next</button>
+    <button onclick="finishMemorization()">Finish</button>
 </div>
 
-<div id="statsContainer">
-  <h3>History Stats</h3>
-  <ul id="statsList"></ul>
+<div id="reproduction" style="display:none;">
+    <h3>Reproduction Phase</h3>
+    <p>Time: <span id="reproTime">0</span> s</p>
+    <div id="placeholders"></div>
+    <div id="digitButtons"></div>
+    <button onclick="submitReproduction()">Submit</button>
+</div>
+
+<div id="results" style="display:none;">
+    <h3>Results</h3>
+    <p id="score"></p>
+    <p id="totalTime"></p>
 </div>
 
 <script>
-let numbers=[],currentIndex=0,lockedNumbers=[],countdownInterval=null,mode="count",selectedPlaceholder=null,startTime=null;
+let numbers=[],userInput=[],currentIndex=0,lockInterval=null,totalTime=0;
+let memorizeTimer=null,seconds=0,reproSeconds=0,reproTimer=null;
+let activePlaceholder=null;
 
-document.getElementById("digitSelect").addEventListener("change",function(){
-  const prefixLabel=document.getElementById("prefixLabel");
-  const prefixInput=document.getElementById("prefixInput");
-  if(this.value==="3prefix"){ prefixLabel.style.display="inline"; prefixInput.style.display="inline"; }
-  else { prefixLabel.style.display="none"; prefixInput.style.display="none"; }
+// Toggle input options
+document.getElementById('methodSelect').addEventListener('change', function(){
+    if(this.value==='count'){
+        document.getElementById('countOption').style.display='inline';
+        document.getElementById('timerOption').style.display='none';
+    } else {
+        document.getElementById('countOption').style.display='none';
+        document.getElementById('timerOption').style.display='inline';
+    }
 });
-
-document.getElementById("modeSelect").addEventListener("change",function(){
-  mode=this.value;
-  document.getElementById("countMode").style.display=mode==="count"?"block":"none";
-  document.getElementById("timerMode").style.display=mode==="timer"?"block":"none";
-});
-
-function generateNumber(){
-  const digitChoice=document.getElementById("digitSelect").value;
-  if(digitChoice==="2"){ return String(Math.floor(Math.random()*100)).padStart(2,'0'); }
-  else if(digitChoice==="3"){ return String(Math.floor(Math.random()*1000)).padStart(3,'0'); }
-  else { const prefix=document.getElementById("prefixInput").value; return prefix+String(Math.floor(Math.random()*100)).padStart(2,'0'); }
-}
 
 function startMemorization(){
-  resetAll();
-  currentIndex=0; lockedNumbers=[]; numbers=[]; startTime=Date.now();
-  if(mode==="count"){
-    const total=parseInt(document.getElementById("totalNumbers").value);
-    for(let i=0;i<total;i++) numbers.push(generateNumber());
-    showNextNumber();
-  } else {
-    const minutes=parseInt(document.getElementById("memMinutes").value);
-    const totalSeconds=minutes*60;
-    numbers.push(generateNumber());
-    let seconds=0;
-    document.getElementById("numbersLeft").innerText="";
-    document.getElementById("countdownBar").style.width="100%";
-    countdownInterval=setInterval(()=>{
-      const percent=(seconds/totalSeconds)*100;
-      document.getElementById("countdownBar").style.width=(100-percent)+"%";
-      seconds++;
-      if(seconds>=totalSeconds){ clearInterval(countdownInterval); document.getElementById("countdownBar").style.width="0%"; showReproduction(); }
-      else { numbers.push(generateNumber()); showNextNumber(); }
-    },1000);
-  }
+    numbers=[];
+    currentIndex=0;
+    seconds=0;
+    document.getElementById('memorization').style.display='block';
+    document.getElementById('reproduction').style.display='none';
+    document.getElementById('results').style.display='none';
+    userInput=[];
+    
+    const method=document.getElementById('methodSelect').value;
+    if(method==='count'){
+        const count=parseInt(document.getElementById('numCount').value);
+        for(let i=0;i<count;i++) numbers.push(Math.floor(Math.random()*100));
+        totalTime=0;
+    } else {
+        const mins=parseInt(document.getElementById('memMinutes').value);
+        const totalSeconds=mins*60;
+        totalTime=totalSeconds;
+        // Generate numbers as user goes
+    }
+    document.getElementById('numbersLeft').innerText='Numbers left: '+(numbers.length-currentIndex);
+    displayCurrentNumber();
+
+    if(method==='timer'){
+        memorizeTimer=setInterval(()=>{
+            seconds++;
+            if(seconds>=totalTime){
+                clearInterval(memorizeTimer);
+                finishMemorization();
+            }
+        },1000);
+    }
 }
 
-function showNextNumber(){
-  if(mode==="count"){
-    if(currentIndex>=numbers.length){ showReproduction(); return; }
-    document.getElementById("currentNumber").innerText=numbers[currentIndex];
-    document.getElementById("numbersLeft").innerText="Numbers left: "+(numbers.length-currentIndex-1);
-    lockedNumbers.push(numbers[currentIndex]);
-    updateList();
+function displayCurrentNumber(){
+    const numDiv=document.getElementById('currentNumber');
+    if(numbers[currentIndex]!==undefined) numDiv.textContent=numbers[currentIndex];
+    document.getElementById('numbersLeft').innerText='Numbers left: '+(numbers.length-currentIndex);
+}
+
+function nextNumber(){
     currentIndex++;
-  } else { document.getElementById("currentNumber").innerText=numbers[numbers.length-1]; updateList(); }
+    if(currentIndex>=numbers.length){
+        finishMemorization();
+    } else displayCurrentNumber();
 }
 
-function updateList(){
-  const list=document.getElementById("numberList"); list.innerHTML="";
-  lockedNumbers.forEach(n=>{ const li=document.createElement("li"); li.innerText=n; list.appendChild(li); });
+function finishMemorization(){
+    clearInterval(memorizeTimer);
+    document.getElementById('memorization').style.display='none';
+    startReproduction();
 }
 
-function resetAll(){
-  lockedNumbers=[]; numbers=[]; currentIndex=0; selectedPlaceholder=null;
-  document.getElementById("currentNumber").innerText="--";
-  document.getElementById("numberList").innerHTML="";
-  document.getElementById("numbersLeft").innerText="";
-  document.getElementById("reproductionContainer").style.display="none";
-  document.getElementById("scoreDisplay").innerText="";
-  if(countdownInterval) clearInterval(countdownInterval);
-}
+function startReproduction(){
+    document.getElementById('reproduction').style.display='block';
+    const placeholdersDiv=document.getElementById('placeholders');
+    const digitsDiv=document.getElementById('digitButtons');
+    placeholdersDiv.innerHTML=''; digitsDiv.innerHTML='';
+    userInput=Array(numbers.length).fill('');
 
-function showReproduction(){
-  document.getElementById("reproductionContainer").style.display="block";
-  const placeholdersDiv=document.getElementById("placeholders");
-  const digitButtonsDiv=document.getElementById("digitButtons");
-  placeholdersDiv.innerHTML=""; digitButtonsDiv.innerHTML=""; selectedPlaceholder=null;
-  numbers.forEach((_,i)=>{
-    const ph=document.createElement("div"); ph.className="placeholder"; ph.dataset.index=i;
-    ph.addEventListener("click",()=>{ selectedPlaceholder=i; placeholdersDiv.querySelectorAll(".placeholder").forEach(p=>{ if(p!==ph)p.style.borderColor="#3498db"; }); ph.style.borderColor="#e74c3c"; });
-    placeholdersDiv.appendChild(ph);
-  });
-  for(let d=0;d<=9;d++){
-    const btn=document.createElement("button"); btn.className="digitButton"; btn.innerText=d;
-    btn.addEventListener("click",()=>{ if(selectedPlaceholder!==null){ placeholdersDiv.children[selectedPlaceholder].innerText=d; placeholdersDiv.children[selectedPlaceholder].style.color="#27ae60"; } });
-    digitButtonsDiv.appendChild(btn);
-  }
+    // Reproduction timer
+    reproSeconds=0;
+    document.getElementById('reproTime').textContent='0';
+    clearInterval(reproTimer);
+    reproTimer=setInterval(()=>{ reproSeconds++; document.getElementById('reproTime').textContent=reproSeconds; },1000);
+
+    // placeholders
+    numbers.forEach((_,i)=>{
+        const ph=document.createElement('div');
+        ph.className='placeholder';
+        ph.dataset.index=i;
+        ph.textContent='';
+        ph.onclick=()=>{ activePlaceholder=i; };
+        placeholdersDiv.appendChild(ph);
+    });
+
+    // digit buttons
+    for(let d=0; d<=9; d++){
+        const btn=document.createElement('div');
+        btn.className='digit';
+        btn.textContent=d;
+        btn.onclick=()=>{
+            if(activePlaceholder!=null){
+                userInput[activePlaceholder]=d;
+                document.querySelectorAll('.placeholder')[activePlaceholder].textContent=d;
+            }
+        };
+        digitsDiv.appendChild(btn);
+    }
 }
 
 function submitReproduction(){
-  let correct=0; const placeholdersDiv=document.getElementById("placeholders");
-  numbers.forEach((num,i)=>{ if(placeholdersDiv.children[i].innerText===num) correct++; });
-  const score=((correct/numbers.length)*10).toFixed(2);
-  const timeTaken=Math.floor((Date.now()-startTime)/1000);
-  document.getElementById("scoreDisplay").innerText=`Correct: ${correct}/${numbers.length} → Score: ${score}/10`;
-  saveNumbersStats(score,timeTaken,numbers.length);
-  loadStats();
+    clearInterval(reproTimer);
+    totalTime += reproSeconds;
+    let correct=0;
+    for(let i=0;i<numbers.length;i++) if(userInput[i]==numbers[i]) correct++;
+    document.getElementById('score').textContent=`Correct: ${correct}/${numbers.length}`;
+    document.getElementById('totalTime').textContent=`Total Time Taken: ${totalTime} seconds (Memorization + Reproduction)`;
+    document.getElementById('reproduction').style.display='none';
+    document.getElementById('results').style.display='block';
 }
 
-function saveNumbersStats(score,time,total){
-  const stats=JSON.parse(localStorage.getItem("numbersStats"))||[];
-  stats.push({date:new Date().toISOString().split("T")[0],score:parseFloat(score),time:time,total:total});
-  localStorage.setItem("numbersStats",JSON.stringify(stats));
+function resetAll(){
+    numbers=[]; userInput=[]; currentIndex=0; totalTime=0;
+    clearInterval(memorizeTimer); clearInterval(reproTimer);
+    document.getElementById('memorization').style.display='none';
+    document.getElementById('reproduction').style.display='none';
+    document.getElementById('results').style.display='none';
 }
-
-function loadStats(){
-  const stats=JSON.parse(localStorage.getItem("numbersStats"))||[];
-  const list=document.getElementById("statsList"); list.innerHTML="";
-  stats.forEach(s=>{ const li=document.createElement("li"); li.innerText=`${s.date} → Total: ${s.total}, Score: ${s.score}/10, Time: ${s.time}s`; list.appendChild(li); });
-}
-
-loadStats();
 </script>
+
 </body>
 </html>
