@@ -1,249 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Random Number Generator</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-      background: linear-gradient(135deg, #f0f9ff, #cbebff);
-      color: #333;
-    }
-
-    h2 {
-      color: #2c3e50;
-      font-size: 32px;
-      margin-bottom: 20px;
-    }
-
-    label {
-      font-weight: bold;
-      margin-right: 5px;
-    }
-
-    select, input {
-      margin: 8px;
-      padding: 8px 12px;
-      font-size: 16px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      outline: none;
-      transition: 0.2s;
-    }
-
-    select:focus, input:focus {
-      border-color: #3498db;
-      box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
-    }
-
-    button {
-      margin: 10px;
-      padding: 14px 28px;
-      font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.2s, opacity 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
-
-    button:active {
-      transform: scale(0.95);
-    }
-
-    button:nth-of-type(1) {
-      background: #27ae60;
-      color: white;
-    }
-
-    button:nth-of-type(2) {
-      background: #e74c3c;
-      color: white;
-    }
-
-    #currentNumber {
-      font-size: 48px;
-      margin: 25px auto 15px auto;
-      width: 180px;
-      padding: 20px;
-      background: #27ae60;
-      color: white;
-      border-radius: 15px;
-      font-weight: bold;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
-    }
-
-    #countdownContainer {
-      width: 180px;
-      height: 12px;
-      background: #eee;
-      margin: 10px auto 25px auto;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: inset 0px 2px 5px rgba(0,0,0,0.1);
-    }
-
-    #countdownBar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #2ecc71, #27ae60);
-      transition: width 0.1s linear;
-    }
-
-    h3 {
-      margin-top: 30px;
-      color: #2c3e50;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    li {
-      background: #f8f9fa;
-      margin: 5px;
-      padding: 12px 20px;
-      min-width: 70px;
-      border-radius: 8px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #2c3e50;
-      box-shadow: 0px 2px 6px rgba(0,0,0,0.15);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Fix | Numbers</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f0f0f0; margin:0; padding:0; }
+header { background:#2c3e50; color:#fff; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; }
+nav a { color:#fff; margin-left:1rem; text-decoration:none; font-weight:bold; }
+nav a:hover { text-decoration:underline; }
+main { padding:2rem; max-width:900px; margin:auto; }
+button { padding:0.5rem 1rem; margin:5px; border:none; border-radius:8px; background:#3498db; color:#fff; cursor:pointer; }
+button:hover { background:#2980b9; }
+#generatedNumber { font-size:2rem; font-weight:bold; text-align:center; margin:1rem; padding:1rem; background:#fff; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+#numberList { margin-top:1rem; background:#fff; padding:1rem; border-radius:12px; min-height:100px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+label { display:block; margin:10px 0; }
+</style>
 </head>
 <body>
-  <h2>🎲 Random Number Generator</h2>
 
-  <label>Choose digits:</label>
-  <select id="digitSelect">
-    <option value="2">2-digit</option>
-    <option value="3">3-digit</option>
-    <option value="3prefix">3-digit with custom prefix</option>
-  </select>
+<header>
+<h1>Memory Fix</h1>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="disciplines.html">Disciplines</a>
+  <a href="numbers.html">Numbers</a>
+  <a href="stats.html">Stats</a>
+  <a href="about.html">About</a>
+</nav>
+</header>
 
-  <label id="prefixLabel" style="display:none;">Prefix:</label>
-  <input type="number" id="prefixInput" min="0" max="9" value="0" style="display:none;">
+<main>
+<h2>Random Number Memorization</h2>
 
-  <label>⏱ Lock Time (ms):</label>
-  <input type="number" id="lockTime" value="1000" min="100">
+<label>Choose number type:
+<select id="numberType">
+  <option value="2digit">2-Digit</option>
+  <option value="3digit">3-Digit</option>
+  <option value="custom">Custom Prefix 3-Digit</option>
+</select>
+</label>
 
-  <br><br>
-  <button onclick="nextNumber()">Next ➡️</button>
-  <button onclick="resetList()">Reset 🔄</button>
+<label id="prefixLabel" style="display:none;">Prefix (0-9):
+<input type="number" id="prefix" min="0" max="9" value="0"></label>
 
-  <h3>Current Number:</h3>
-  <div id="currentNumber">--</div>
-  <div id="countdownContainer"><div id="countdownBar"></div></div>
+<label>Number of numbers:
+<select id="deckSize">
+  <option value="10">10</option>
+  <option value="20">20</option>
+  <option value="50">50</option>
+</select>
+</label>
 
-  <h3>Locked Numbers:</h3>
-  <ul id="numberList"></ul>
+<button onclick="startMemorization()">Start</button>
 
-  <script>
-    let lastGenerated = null;
-    let lastGeneratedTime = 0;
-    let lockedNumbers = [];
-    let countdownInterval = null;
+<div id="memorization" style="display:none;">
+<p>Memorize this number:</p>
+<div id="generatedNumber"></div>
+<button onclick="nextNumber()">Next</button>
+<p>Time elapsed: <span id="memTime">0</span> s</p>
+</div>
 
-    document.getElementById("digitSelect").addEventListener("change", function() {
-      const prefixLabel = document.getElementById("prefixLabel");
-      const prefixInput = document.getElementById("prefixInput");
-      if (this.value === "3prefix") {
-        prefixLabel.style.display = "inline";
-        prefixInput.style.display = "inline";
-      } else {
-        prefixLabel.style.display = "none";
-        prefixInput.style.display = "none";
-      }
-    });
+<div id="recollection" style="display:none;">
+<p>Recollection phase (1 min). Try to recall the numbers. <button onclick="skipRecollection()">Skip</button></p>
+</div>
 
-    function generateNumber() {
-      const digitChoice = document.getElementById("digitSelect").value;
+<div id="reproduction" style="display:none;">
+<p>Reproduction phase: Drag the numbers into correct order.</p>
+<div id="placeholders" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;"></div>
+<div id="deck" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+<button onclick="submitReproduction()">Submit</button>
+</div>
 
-      if (digitChoice === "2") {
-        return String(Math.floor(Math.random() * 100)).padStart(2, '0'); // 00–99
-      } 
-      else if (digitChoice === "3") {
-        return String(Math.floor(Math.random() * 1000)).padStart(3, '0'); // 000–999
-      }
-      else if (digitChoice === "3prefix") {
-        const prefix = document.getElementById("prefixInput").value;
-        const suffix = String(Math.floor(Math.random() * 100)).padStart(2, '0'); // 00–99
-        return prefix + suffix; 
-      }
-    }
+<div id="results" style="display:none;">
+<p id="score"></p>
+</div>
 
-    function nextNumber() {
-      const now = Date.now();
-      const lockTime = parseInt(document.getElementById("lockTime").value);
+<div id="numberList"></div>
 
-      if (lastGenerated !== null && now - lastGeneratedTime < lockTime) {
-        lockedNumbers.push(lastGenerated);
-        updateList();
-      }
+<script>
+let chosenNumbers=[],deckSize=10,memIndex=0,seconds=0,memTimer=[],userChoices=[];
 
-      lastGenerated = generateNumber();
-      lastGeneratedTime = Date.now();
-      document.getElementById("currentNumber").textContent = lastGenerated;
+// Show prefix only if custom
+document.getElementById('numberType').addEventListener('change', e=>{
+  document.getElementById('prefixLabel').style.display = e.target.value==='custom'?'inline-block':'none';
+});
 
-      startCountdown(lockTime);
-    }
+function generateNumbers(type,n,prefix=0){
+  const nums=[];
+  for(let i=0;i<n;i++){
+    let num;
+    if(type==='2digit') num=Math.floor(Math.random()*90)+10;
+    else if(type==='3digit') num=Math.floor(Math.random()*1000).toString().padStart(3,'0');
+    else num=(prefix.toString() + Math.floor(Math.random()*100).toString().padStart(2,'0'));
+    nums.push(num);
+  }
+  return nums;
+}
 
-    function updateList() {
-      const list = document.getElementById("numberList");
-      list.innerHTML = "";
-      lockedNumbers.forEach(num => {
-        const li = document.createElement("li");
-        li.textContent = num;
-        list.appendChild(li);
-      });
-    }
+function startMemorization(){
+  deckSize=parseInt(document.getElementById('deckSize').value);
+  const type=document.getElementById('numberType').value;
+  const prefix=parseInt(document.getElementById('prefix').value)||0;
+  chosenNumbers=generateNumbers(type,deckSize,prefix);
+  memIndex=0; seconds=0; userChoices=[];
+  document.getElementById('memorization').style.display='block';
+  document.getElementById('recollection').style.display='none';
+  document.getElementById('reproduction').style.display='none';
+  document.getElementById('results').style.display='none';
+  document.getElementById('numberList').innerHTML='';
+  document.getElementById('memTime').innerText='0';
+  displayMemorizeNumber();
+  memTimer=setInterval(()=>{seconds++; document.getElementById('memTime').innerText=seconds;},1000);
+}
 
-    function resetList() {
-      lockedNumbers = [];
-      lastGenerated = null;
-      lastGeneratedTime = 0;
-      document.getElementById("currentNumber").textContent = "--";
-      stopCountdown();
-      updateList();
-    }
+function displayMemorizeNumber(){
+  document.getElementById('generatedNumber').innerText=chosenNumbers[memIndex];
+}
 
-    function startCountdown(lockTime) {
-      stopCountdown();
-      const bar = document.getElementById("countdownBar");
-      const startTime = Date.now();
+function nextNumber(){
+  memIndex++;
+  if(memIndex>=chosenNumbers.length){
+    clearInterval(memTimer);
+    document.getElementById('memorization').style.display='none';
+    startRecollection();
+  } else displayMemorizeNumber();
+}
 
-      countdownInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const percent = Math.min((elapsed / lockTime) * 100, 100);
-        bar.style.width = (100 - percent) + "%";
+function startRecollection(){
+  document.getElementById('recollection').style.display='block';
+  setTimeout(()=>{ document.getElementById('recollection').style.display='none'; startReproduction(); },60000);
+}
+function skipRecollection(){ document.getElementById('recollection').style.display='none'; startReproduction(); }
 
-        if (elapsed >= lockTime) {
-          stopCountdown();
-          bar.style.width = "0%";
-        }
-      }, 50);
-    }
+function startReproduction(){
+  document.getElementById('reproduction').style.display='block';
+  renderReproduction();
+}
+function renderReproduction(){
+  const placeholdersDiv=document.getElementById('placeholders');
+  const deckDiv=document.getElementById('deck');
+  placeholdersDiv.innerHTML=''; deckDiv.innerHTML=''; userChoices=Array(chosenNumbers.length).fill(null);
 
-    function stopCountdown() {
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-      }
-    }
-  </script>
+  chosenNumbers.forEach((_,i)=>{
+    const ph=document.createElement('div'); ph.className='number-placeholder';
+    ph.dataset.index=i;
+    ph.ondragover=e=>e.preventDefault();
+    ph.ondrop=e=>{
+      const idx=e.dataTransfer.getData('text'); 
+      const div=document.getElementById('num-'+idx);
+      ph.innerHTML=''; ph.appendChild(div); userChoices[i]=parseInt(idx);
+    };
+    placeholdersDiv.appendChild(ph);
+  });
+
+  chosenNumbers.forEach((num,i)=>{
+    const div=document.createElement('div');
+    div.id='num-'+i; div.className='number-card';
+    div.innerText=num; div.draggable=true;
+    div.ondragstart=e=>e.dataTransfer.setData('text',i);
+    deckDiv.appendChild(div);
+  });
+}
+
+function submitReproduction(){
+  let correct=0;
+  userChoices.forEach((u,i)=>{ if(u!==null && chosenNumbers[u]===chosenNumbers[i]) correct++; });
+  let score10=((correct/chosenNumbers.length)*10).toFixed(2);
+  document.getElementById('score').innerText=`Correct: ${correct}/${chosenNumbers.length} → Score: ${score10}/10`;
+  document.getElementById('reproduction').style.display='none';
+  document.getElementById('results').style.display='block';
+  saveNumbersStats(score10,seconds,document.getElementById('numberType').value);
+}
+
+function saveNumbersStats(score,time,mode){
+  let stats=JSON.parse(localStorage.getItem('numbersStats'))||[];
+  stats.push({date:new Date().toISOString().split('T')[0], mode:mode, score:parseFloat(score), time:time});
+  localStorage.setItem('numbersStats',JSON.stringify(stats));
+}
+</script>
+
 </body>
 </html>
