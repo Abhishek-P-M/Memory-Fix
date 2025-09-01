@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Fix - Cards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #333; }
+    .setup, .memorize, .recollection, .reproduction, .result {
+      display: none;
+      margin-top: 20px;
+    }
+    .cards { font-size: 2rem; margin: 20px 0; }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    select {
+      padding: 5px;
+      font-size: 1rem;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cards Discipline</h1>
+
+  <!-- Setup -->
+  <div class="setup" id="setup">
+    <label for="deckSize">Deck size:</label>
+    <select id="deckSize">
+      <option value="10">10 cards</option>
+      <option value="20">20 cards</option>
+      <option value="30">30 cards</option>
+      <option value="40">40 cards</option>
+      <option value="52">52 cards</option>
+    </select>
+
+    <label for="groupSize">Group size:</label>
+    <select id="groupSize">
+      <option value="1">1 card</option>
+      <option value="2">2 cards</option>
+      <option value="3">3 cards</option>
+      <option value="4">4 cards</option>
+      <option value="5">5 cards</option>
+      <option value="6">6 cards</option>
+    </select>
+
+    <br>
+    <button onclick="startMemorization()">Start</button>
+    <button onclick="resetPreferences()">Reset Preferences</button>
+  </div>
+
+  <!-- Memorization -->
+  <div class="memorize" id="memorize">
+    <h2>Memorization</h2>
+    <div id="timer">Time: 0s</div>
+    <div class="cards" id="currentGroup"></div>
+    <button onclick="nextGroup()">Next</button>
+  </div>
+
+  <!-- Recollection -->
+  <div class="recollection" id="recollection">
+    <h2>Recollection Phase</h2>
+    <p>You have 1 minute to recall mentally. Or skip now:</p>
+    <button onclick="skipRecollection()">Skip</button>
+    <div id="recollectionTimer"></div>
+  </div>
+
+  <!-- Reproduction -->
+  <div class="reproduction" id="reproduction">
+    <h2>Reproduction</h2>
+    <p>Select the cards in the order shown:</p>
+    <div id="deckChoices"></div>
+    <div id="userSequence" style="margin:20px;"></div>
+    <button onclick="submitSequence()">Submit</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result">
+    <h2>Result</h2>
+    <p id="score"></p>
+    <button onclick="restart()">Try Again</button>
+  </div>
+
+  <script>
+    const suits = ["♠", "♥", "♦", "♣"];
+    const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+    let deck = [], shownSequence = [], userSequence = [];
+    let groupSize, deckSize;
+    let memorizeIndex = 0, memorizeStartTime, memorizeTimer;
+    let recollectionTimer, recollectionTime = 60;
+
+    // Load preferences
+    window.onload = function() {
+      const savedDeckSize = localStorage.getItem("deckSize");
+      const savedGroupSize = localStorage.getItem("groupSize");
+      if (savedDeckSize) document.getElementById("deckSize").value = savedDeckSize;
+      if (savedGroupSize) document.getElementById("groupSize").value = savedGroupSize;
+      document.getElementById("setup").style.display = "block";
+    };
+
+    // Save preferences
+    document.getElementById("deckSize").addEventListener("change", function() {
+      localStorage.setItem("deckSize", this.value);
+    });
+    document.getElementById("groupSize").addEventListener("change", function() {
+      localStorage.setItem("groupSize", this.value);
+    });
+
+    function resetPreferences() {
+      localStorage.removeItem("deckSize");
+      localStorage.removeItem("groupSize");
+      document.getElementById("deckSize").value = 52;
+      document.getElementById("groupSize").value = 1;
+      alert("Preferences reset to default.");
+    }
+
+    function generateDeck(n) {
+      let fullDeck = [];
+      for (let s of suits) {
+        for (let v of values) {
+          fullDeck.push(v + s);
+        }
+      }
+      // shuffle
+      for (let i = fullDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[i]];
+      }
+      return fullDeck.slice(0, n);
+    }
+
+    function startMemorization() {
+      deckSize = parseInt(document.getElementById("deckSize").value);
+      groupSize = parseInt(document.getElementById("groupSize").value);
+      localStorage.setItem("deckSize", deckSize);
+      localStorage.setItem("groupSize", groupSize);
+
+      deck = generateDeck(deckSize);
+      shownSequence = [];
+      memorizeIndex = 0;
+
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("memorize").style.display = "block";
+
+      memorizeStartTime = Date.now();
+      memorizeTimer = setInterval(() => {
+        let elapsed = Math.floor((Date.now() - memorizeStartTime) / 1000);
+        document.getElementById("timer").innerText = "Time: " + elapsed + "s";
+      }, 1000);
+
+      showGroup();
+    }
+
+    function showGroup() {
+      let group = deck.slice(memorizeIndex, memorizeIndex + groupSize);
+      document.getElementById("currentGroup").innerText = group.join(" ");
+    }
+
+    function nextGroup() {
+      let group = deck.slice(memorizeIndex, memorizeIndex + groupSize);
+      shownSequence.push(...group);
+      memorizeIndex += groupSize;
+
+      if (memorizeIndex >= deck.length) {
+        clearInterval(memorizeTimer);
+        startRecollection();
+      } else {
+        showGroup();
+      }
+    }
+
+    function startRecollection() {
+      document.getElementById("memorize").style.display = "none";
+      document.getElementById("recollection").style.display = "block";
+      recollectionTime = 60;
+      document.getElementById("recollectionTimer").innerText = "Time left: 60s";
+
+      recollectionTimer = setInterval(() => {
+        recollectionTime--;
+        document.getElementById("recollectionTimer").innerText = "Time left: " + recollectionTime + "s";
+        if (recollectionTime <= 0) {
+          clearInterval(recollectionTimer);
+          startReproduction();
+        }
+      }, 1000);
+    }
+
+    function skipRecollection() {
+      clearInterval(recollectionTimer);
+      startReproduction();
+    }
+
+    function startReproduction() {
+      document.getElementById("recollection").style.display = "none";
+      document.getElementById("reproduction").style.display = "block";
+      userSequence = [];
+
+      let choicesDiv = document.getElementById("deckChoices");
+      choicesDiv.innerHTML = "";
+      let deckCopy = [...deck];
+      deckCopy.forEach(card => {
+        let btn = document.createElement("button");
+        btn.innerText = card;
+        btn.onclick = () => selectCard(card);
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    function selectCard(card) {
+      userSequence.push(card);
+      let userDiv = document.getElementById("userSequence");
+      userDiv.innerText = "Your sequence: " + userSequence.join(" ");
+    }
+
+    function submitSequence() {
+      let correct = 0;
+      for (let i = 0; i < shownSequence.length; i++) {
+        if (userSequence[i] === shownSequence[i]) correct++;
+      }
+      let score10 = ((correct / shownSequence.length) * 10).toFixed(2);
+
+      document.getElementById("reproduction").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      document.getElementById("score").innerText =
+        `Correct: ${correct}/${shownSequence.length} → Score: ${score10}/10`;
+    }
+
+    function restart() {
+      document.getElementById("result").style.display = "none";
+      document.getElementById("setup").style.display = "block";
+    }
+  </script>
+</body>
+</html>
