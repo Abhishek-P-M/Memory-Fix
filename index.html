@@ -5,129 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Memory Fix</title>
 <style>
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin:0;
-  padding:0;
-  background: linear-gradient(135deg, #f0f9ff, #cbebff);
-  color:#333;
-}
-
-/* Navbar */
-.navbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#2c3e50;
-  padding:1rem 2rem;
-}
-
-.navbar .logo {
-  color:#fff;
-  font-size:1.8rem;
-  font-weight:bold;
-  text-decoration:none;
-}
-
-.navbar ul {
-  list-style:none;
-  display:flex;
-  margin:0;
-  padding:0;
-}
-
-.navbar li {
-  position:relative;
-}
-
-.navbar li a {
-  color:#fff;
-  text-decoration:none;
-  padding:10px 15px;
-  display:block;
-  font-weight:500;
-  transition:0.3s;
-}
-
-.navbar li a:hover { background:#34495e; border-radius:5px; }
-
-.navbar li ul {
-  display:none;
-  position:absolute;
-  top:100%;
-  left:0;
-  background:#fff;
-  min-width:200px;
-  border-radius:5px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.2);
-  z-index:100;
-}
-
+body { font-family:"Segoe UI",sans-serif; margin:0; padding:0; background:linear-gradient(135deg,#f0f9ff,#cbebff); color:#333; }
+.navbar { display:flex; justify-content:space-between; align-items:center; background:#2c3e50; padding:1rem 2rem; }
+.navbar .logo { color:white; font-size:1.5rem; font-weight:bold; text-decoration:none; }
+.navbar ul { list-style:none; display:flex; margin:0; padding:0; }
+.navbar li { position:relative; }
+.navbar li a { color:white; text-decoration:none; padding:0.5rem 1rem; display:block; font-weight:500; }
+.navbar li a:hover { background:#34495e; border-radius:4px; }
+.navbar li ul { display:none; position:absolute; top:100%; left:0; background:white; min-width:200px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:1000; }
 .navbar li:hover ul { display:block; }
-
-.navbar li ul li a {
-  color:#2c3e50;
-  padding:10px 15px;
-}
-
-.navbar li ul li a:hover { background:#e6f0ff; }
-
-/* Hero section */
-.hero {
-  text-align:center;
-  padding:100px 20px;
-  background: linear-gradient(135deg, #007acc, #004a99);
-  color:white;
-}
-
+.navbar li ul li a { color:#2c3e50; background:white; }
+.navbar li ul li a:hover { background:#d6eaf8; }
+.hero { text-align:center; padding:80px 20px; color:#2c3e50; }
 .hero h1 { font-size:48px; margin-bottom:15px; }
 .hero p { font-size:20px; max-width:700px; margin:auto; }
-
-/* Content */
-.content {
-  padding:60px 20px;
-  max-width:1000px;
-  margin:auto;
-  text-align:center;
-}
-
-.content h2 { font-size:28px; margin-bottom:20px; color:#004a99; }
+.content { text-align:center; padding:60px 20px; max-width:1000px; margin:auto; }
+.content h2 { font-size:28px; margin-bottom:20px; color:#2c3e50; }
 .content p { font-size:18px; line-height:1.6; }
-
-/* Buttons */
-.button {
-  padding:12px 24px;
-  margin:10px;
-  font-size:18px;
-  font-weight:bold;
-  color:white;
-  background: linear-gradient(90deg,#27ae60,#2ecc71);
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  transition:0.2s;
-}
-
-.button:hover { transform:scale(1.05); opacity:0.9; }
-.button:active { transform:scale(0.95); }
-
-/* Footer */
-.footer {
-  background:#2c3e50;
-  color:white;
-  text-align:center;
-  padding:15px;
-  margin-top:50px;
-}
+.footer { background:#2c3e50; color:white; text-align:center; padding:15px; margin-top:50px; }
+a.button { display:inline-block; margin:8px; padding:14px 28px; background:#27ae60; color:white; font-weight:bold; border-radius:12px; text-decoration:none; transition:0.2s; }
+a.button:hover { background:#2ecc71; transform:scale(1.05); }
 </style>
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar">
-  <a href="#" class="logo">Memory Fix</a>
+  <a href="index.html" class="logo">Memory Fix</a>
   <ul>
-    <li><a href="#">Home</a></li>
+    <li><a href="index.html">Home</a></li>
     <li>
       <a href="#">Disciplines ▾</a>
       <ul>
@@ -153,24 +58,23 @@ body {
   </ul>
 </nav>
 
-<!-- Hero -->
 <div class="hero">
   <h1>Welcome to Memory Fix</h1>
-  <p>Sharpen your memory skills with interactive disciplines inspired by competitive memory training.</p>
+  <p>Sharpen your memory skills with interactive disciplines inspired by competitive memory training. Choose a discipline and start training today!</p>
 </div>
 
-<!-- Content -->
 <div class="content">
   <h2>Train Your Brain</h2>
   <p>
-    Memory Fix offers a variety of disciplines such as numbers, repetition, names, faces, images, words, cards, binary, historic dates, and chess. 
-    Whether you're practicing for competitions or simply looking to boost your memory, our tools will help you improve step by step.
+    Memory Fix offers a variety of disciplines including numbers, names, faces, images, words, cards, binary, historic dates, and chess. Practice at your own pace or challenge yourself with timed exercises.
   </p>
-  <button class="button" onclick="window.location.href='numbers.html'">Start Numbers</button>
-  <button class="button" onclick="window.location.href='repetition.html'">Start Repetition</button>
+  <div>
+    <a href="numbers.html" class="button">Numbers</a>
+    <a href="repetition.html" class="button">Repetition</a>
+    <a href="cards.html" class="button">Cards</a>
+  </div>
 </div>
 
-<!-- Footer -->
 <div class="footer">
   &copy; 2025 Memory Fix. All rights reserved.
 </div>
