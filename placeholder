@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Random Number Generator</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f0f9ff, #cbebff);
+      color: #333;
+    }
+
+    h2 {
+      color: #2c3e50;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    select, input {
+      margin: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    select:focus, input:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+    }
+
+    button {
+      margin: 10px;
+      padding: 14px 28px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:nth-of-type(1) {
+      background: #27ae60;
+      color: white;
+    }
+
+    button:nth-of-type(2) {
+      background: #e74c3c;
+      color: white;
+    }
+
+    #currentNumber {
+      font-size: 48px;
+      margin: 25px auto 15px auto;
+      width: 180px;
+      padding: 20px;
+      background: #27ae60;
+      color: white;
+      border-radius: 15px;
+      font-weight: bold;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    }
+
+    #countdownContainer {
+      width: 180px;
+      height: 12px;
+      background: #eee;
+      margin: 10px auto 25px auto;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: inset 0px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #countdownBar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      transition: width 0.1s linear;
+    }
+
+    h3 {
+      margin-top: 30px;
+      color: #2c3e50;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    li {
+      background: #f8f9fa;
+      margin: 5px;
+      padding: 12px 20px;
+      min-width: 70px;
+      border-radius: 8px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #2c3e50;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+  <h2>🎲 Random Number Generator</h2>
+
+  <label>Choose digits:</label>
+  <select id="digitSelect">
+    <option value="2">2-digit</option>
+    <option value="3">3-digit</option>
+    <option value="3prefix">3-digit with custom prefix</option>
+  </select>
+
+  <label id="prefixLabel" style="display:none;">Prefix:</label>
+  <input type="number" id="prefixInput" min="0" max="9" value="0" style="display:none;">
+
+  <label>⏱ Lock Time (ms):</label>
+  <input type="number" id="lockTime" value="1000" min="100">
+
+  <br><br>
+  <button onclick="nextNumber()">Next ➡️</button>
+  <button onclick="resetList()">Reset 🔄</button>
+
+  <h3>Current Number:</h3>
+  <div id="currentNumber">--</div>
+  <div id="countdownContainer"><div id="countdownBar"></div></div>
+
+  <h3>Locked Numbers:</h3>
+  <ul id="numberList"></ul>
+
+  <script>
+    let lastGenerated = null;
+    let lastGeneratedTime = 0;
+    let lockedNumbers = [];
+    let countdownInterval = null;
+
+    document.getElementById("digitSelect").addEventListener("change", function() {
+      const prefixLabel = document.getElementById("prefixLabel");
+      const prefixInput = document.getElementById("prefixInput");
+      if (this.value === "3prefix") {
+        prefixLabel.style.display = "inline";
+        prefixInput.style.display = "inline";
+      } else {
+        prefixLabel.style.display = "none";
+        prefixInput.style.display = "none";
+      }
+    });
+
+    function generateNumber() {
+      const digitChoice = document.getElementById("digitSelect").value;
+
+      if (digitChoice === "2") {
+        return String(Math.floor(Math.random() * 100)).padStart(2, '0'); // 00–99
+      } 
+      else if (digitChoice === "3") {
+        return String(Math.floor(Math.random() * 1000)).padStart(3, '0'); // 000–999
+      }
+      else if (digitChoice === "3prefix") {
+        const prefix = document.getElementById("prefixInput").value;
+        const suffix = String(Math.floor(Math.random() * 100)).padStart(2, '0'); // 00–99
+        return prefix + suffix; 
+      }
+    }
+
+    function nextNumber() {
+      const now = Date.now();
+      const lockTime = parseInt(document.getElementById("lockTime").value);
+
+      if (lastGenerated !== null && now - lastGeneratedTime < lockTime) {
+        lockedNumbers.push(lastGenerated);
+        updateList();
+      }
+
+      lastGenerated = generateNumber();
+      lastGeneratedTime = Date.now();
+      document.getElementById("currentNumber").textContent = lastGenerated;
+
+      startCountdown(lockTime);
+    }
+
+    function updateList() {
+      const list = document.getElementById("numberList");
+      list.innerHTML = "";
+      lockedNumbers.forEach(num => {
+        const li = document.createElement("li");
+        li.textContent = num;
+        list.appendChild(li);
+      });
+    }
+
+    function resetList() {
+      lockedNumbers = [];
+      lastGenerated = null;
+      lastGeneratedTime = 0;
+      document.getElementById("currentNumber").textContent = "--";
+      stopCountdown();
+      updateList();
+    }
+
+    function startCountdown(lockTime) {
+      stopCountdown();
+      const bar = document.getElementById("countdownBar");
+      const startTime = Date.now();
+
+      countdownInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const percent = Math.min((elapsed / lockTime) * 100, 100);
+        bar.style.width = (100 - percent) + "%";
+
+        if (elapsed >= lockTime) {
+          stopCountdown();
+          bar.style.width = "0%";
+        }
+      }, 50);
+    }
+
+    function stopCountdown() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    }
+  </script>
+</body>
+</html>
