@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chess Square Trainer</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f0f9ff, #cbebff);
+      color: #333;
+    }
+
+    h2 {
+      color: #2c3e50;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    #chessboard {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      margin: 20px auto;
+      border: 4px solid #2c3e50;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .square {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .white {
+      background: #f0d9b5;
+    }
+
+    .brown {
+      background: #b58863;
+    }
+
+    .highlight {
+      outline: 4px solid #27ae60;
+      outline-offset: -4px;
+    }
+
+    button {
+      margin: 15px;
+      padding: 14px 28px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+      background: #27ae60;
+      color: white;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    #timer {
+      font-size: 22px;
+      margin-top: 15px;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <h2>♟️ Chess Square Trainer</h2>
+
+  <div id="chessboard"></div>
+
+  <button onclick="nextSquare()">Next ➡️</button>
+  <div id="timer">Time since last: 0s</div>
+
+  <script>
+    const board = document.getElementById("chessboard");
+    let squares = [];
+    let highlighted = null;
+    let startTime = null;
+    let timerInterval = null;
+
+    // Create chessboard
+    function createBoard() {
+      const files = "abcdefgh";
+      for (let row = 8; row >= 1; row--) {
+        for (let col = 0; col < 8; col++) {
+          const square = document.createElement("div");
+          square.classList.add("square");
+          square.classList.add((row + col) % 2 === 0 ? "white" : "brown");
+          square.dataset.coord = files[col] + row;
+          square.textContent = ""; // hide labels (optional)
+          board.appendChild(square);
+          squares.push(square);
+        }
+      }
+    }
+
+    function nextSquare() {
+      // clear highlight
+      if (highlighted) highlighted.classList.remove("highlight");
+
+      // pick random square
+      const randomIndex = Math.floor(Math.random() * squares.length);
+      highlighted = squares[randomIndex];
+      highlighted.classList.add("highlight");
+
+      // reset timer
+      startTime = Date.now();
+      document.getElementById("timer").textContent = "Time since last: 0s";
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById("timer").textContent = "Time since last: " + seconds + "s";
+      }, 500);
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
